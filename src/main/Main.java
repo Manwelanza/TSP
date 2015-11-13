@@ -18,7 +18,12 @@ public class Main {
 	 * @param args argumentos que se le pasen línea de comandos
 	 */
 	public static void main(String[] args) {
-		TspInstance tsp = new TspInstance(FICHERO);
+		TspInstance tsp;
+		if (args == null)
+			tsp = new TspInstance ();
+		else
+			tsp = new TspInstance(args[0]);
+		
 
 	}
 

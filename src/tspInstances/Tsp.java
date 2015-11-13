@@ -71,7 +71,7 @@ public class Tsp {
 	/**
 	 * @return the nodos
 	 */
-	private int getNodos() {
+	public int getNodos() {
 		return nodos;
 	}
 	/**
