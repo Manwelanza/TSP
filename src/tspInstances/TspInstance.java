@@ -69,22 +69,21 @@ public class TspInstance {
 			element = (Element) list.get(5);
 			list = element.getChildren("vertex");
 			nodos = list.size();
-			boolean good = false;
+			int contador = 0;
 			for (int i = 0; i < list.size(); i++){
 				element = (Element) list.get(i);
 				List auxList = element.getChildren("edge");
-				good = false;
-				for (int j = 0; j < auxList.size(); j++) {
-					if ((nodos > auxList.size()) && (j == i) && (good == false)) {
-						aux.add(0.0);
-						j--;
-						good = true;
+				for (int j = 0; j < nodos; j++) {
+					if ((nodos > auxList.size()) && (j == i)) {
+						aux.add(Double.MAX_VALUE);  // PREGUNTAR ESTA LINEA
 					}
 					else {
-						element = (Element) auxList.get(j);
+						element = (Element) auxList.get(contador);
+						contador++;
 						aux.add(Double.parseDouble(element.getAttributeValue("cost")));
 					}
 				}
+				contador = 0;
 			}
 			setTsp(new Tsp (aux, nodos));
 			setLoad(true);
@@ -111,7 +110,7 @@ public class TspInstance {
 	/**
 	 * @return the tsp
 	 */
-	private Tsp getTsp() {
+	public Tsp getTsp() {
 		return tsp;
 	}
 
@@ -181,7 +180,7 @@ public class TspInstance {
 	/**
 	 * @return the load
 	 */
-	private boolean isLoad() {
+	public boolean isLoad() {
 		return load;
 	}
 

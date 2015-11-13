@@ -4,6 +4,7 @@
 package main;
 
 import tspInstances.TspInstance;
+import upperBound.UpperBound;
 
 /**
  * @author ManuelAlejandro
@@ -24,7 +25,11 @@ public class Main {
 		else
 			tsp = new TspInstance(args[0]);
 		
-
+		if (tsp.isLoad()) {
+			UpperBound ub = new UpperBound(tsp);
+			System.out.println(ub.getBestValue());
+			ub.showWay();
+		}
 	}
 
 }

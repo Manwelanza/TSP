@@ -23,6 +23,10 @@ public class Tsp {
 	public Tsp (ArrayList<Double> costs, int nodos) {
 		setCosts(costs);
 		setNodos(nodos);
+		System.out.println(costs.size());
+		int aux = nodos * nodos;
+		System.out.println("nodos: " + nodos);
+		System.out.println("nodos * nodos: " + aux);
 	}
 	
 	/**
@@ -31,7 +35,7 @@ public class Tsp {
 	 * @param column columna, que será el nodo al que llega la arista
 	 * @return costo de la arista
 	 */
-	private Double getCost (int row, int column) {
+	public Double getCost (int row, int column) {
 		double valor;
 		if (((row < getNodos()) && (row >= 0)) && 
 			((column < getNodos()) && (column >= 0))) {
