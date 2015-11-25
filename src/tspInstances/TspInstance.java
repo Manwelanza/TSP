@@ -75,7 +75,7 @@ public class TspInstance {
 				List auxList = element.getChildren("edge");
 				for (int j = 0; j < nodos; j++) {
 					if ((nodos > auxList.size()) && (j == i)) {
-						aux.add(Double.MAX_VALUE);  // PREGUNTAR ESTA LINEA
+						aux.add(Double.MAX_VALUE);
 					}
 					else {
 						element = (Element) auxList.get(contador);
@@ -86,20 +86,7 @@ public class TspInstance {
 				contador = 0;
 			}
 			setTsp(new Tsp (aux, nodos));
-			setLoad(true);
-			
-			// Comprobaciones --> QUITAR
-			
-			/*System.out.println("Name: " + getName());
-			System.out.println("Source: " + getSource());
-			System.out.println("Descripción: " + getDescription());
-			System.out.println("Precisión: " + getPrecision());
-			getTsp().mostrarFila(0);*/
-			
-			//QUITAR LO DE ARRIBA
-			//QUITALOO
-			//QUITALO
-			
+			setLoad(true);			
 		}catch (IOException io) {
 			System.err.println (io.getMessage());
 		} catch (JDOMException jdomex) {

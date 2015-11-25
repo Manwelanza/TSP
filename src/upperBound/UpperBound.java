@@ -7,6 +7,8 @@ import tspInstances.TspInstance;
 
 public class UpperBound {
 	
+	public static final int ITERATIONS_NN = 10;
+	
 	private Double bestValue;
 	private ArrayList<Integer> visited;
 	private ArrayList<Step> way;
@@ -44,7 +46,24 @@ public class UpperBound {
 		 setBestValue (1E100);
 		 setVisited (new ArrayList<Integer> ());
 		 setWay (new ArrayList<Step> ());
+		 int contador = 0;
+		 Double auxBestValue = Double.MAX_VALUE;
+		 ArrayList<Step> auxWay = new ArrayList<Step> ();
 		 calculateNN (tsp);
+		 while (contador < ITERATIONS_NN) {
+			 auxBestValue = getBestValue();
+			 auxWay = copyArray(getWay());
+			 calculateNN (tsp);
+			 if (auxBestValue < getBestValue()) {
+				 setBestValue(auxBestValue);
+				 setWay(copyArray(auxWay));
+				 contador ++;
+			 }
+			 else {
+				 contador = 0;
+			 }
+		 }
+		 
 	}
 	
 	/**
@@ -60,7 +79,10 @@ public class UpperBound {
 	 * @param tsp TSP sobre el que se calcula la cota superior
 	 */
 	private void calculateNN (Tsp tsp) {
+		Double contador = 0.0;
 		int nodos = tsp.getNodos();
+		getVisited().clear();
+		getWay().clear();
 		int nodoActual = (int) Math.floor(Math.random() * nodos); // Vertice arbitrario
 		getVisited().add(nodoActual);
 		double auxMin = Double.MAX_VALUE;
@@ -75,8 +97,7 @@ public class UpperBound {
 			}
 			if (auxNodo != nodoActual) {
 				getWay().add(new Step (nodoActual, auxNodo, tsp.getCost(nodoActual, auxNodo)));
-				if (getBestValue() > tsp.getCost(nodoActual, auxNodo))
-					setBestValue(tsp.getCost(nodoActual, auxNodo));
+				contador += tsp.getCost(nodoActual, auxNodo);
 				nodoActual = auxNodo;
 				getVisited().add(nodoActual);
 			}
@@ -84,8 +105,8 @@ public class UpperBound {
 		}
 		// Añadimos el último paso, entre el último nodo visitado y el primero
 		getWay().add(new Step (nodoActual, getWay().get(0).getOrigin(), tsp.getCost(nodoActual, getWay().get(0).getOrigin())));
-		if (getBestValue() > tsp.getCost(nodoActual, getWay().get(0).getOrigin()))
-			setBestValue(tsp.getCost(nodoActual, getWay().get(0).getOrigin()));
+		contador += tsp.getCost(nodoActual, getWay().get(0).getOrigin());
+		setBestValue(contador);
 	}
 	
 	/**
@@ -93,6 +114,19 @@ public class UpperBound {
 	 */
 	private void calculate2OPT () {
 		
+	}
+	
+	/**
+	 * Método que devuelve una copia del array
+	 * @param array array que copiará
+	 * @return array copiado
+	 */
+	private ArrayList<Step> copyArray (ArrayList<Step> array) {
+		ArrayList<Step> aux = new ArrayList<Step> ();
+		for (int i = 0; i < array.size(); i++) {
+			aux.add(array.get(i));
+		}
+		return aux;
 	}
 
 	/**
