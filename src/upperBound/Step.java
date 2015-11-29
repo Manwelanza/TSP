@@ -22,6 +22,11 @@ public class Step {
 		setCost(cost);						
 	}
 	
+	@Override
+	public String toString () {
+		return getOrigin() + "-->" + getDestination() + " = " + getCost();
+	}
+	
 	/**
 	 * @return the origin
 	 */

@@ -27,8 +27,6 @@ public class Main {
 		
 		if (tsp.isLoad()) {
 			UpperBound ub = new UpperBound(tsp);
-			System.out.println(ub.getBestValue());
-			ub.showWay();
 		}
 	}
 

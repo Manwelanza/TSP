@@ -5,6 +5,8 @@ package tspInstances;
 
 import java.util.ArrayList;
 
+import upperBound.Step;
+
 /**
  * @author ManuelAlejandro
  * @email Manwelanza@gmail.com
@@ -52,12 +54,21 @@ public class Tsp {
 	 * Método que tan solo imprime la fila 1, para poder comprobar que funciona correctamente
 	 * @param fila fila a mostrar
 	 */
-	public void mostrarFila(int fila) {
+	public void mostrarFila(final int fila) {
 		System.out.println("Tiene un total de: " + getNodos() + " nodos");
 		System.out.println("Nodo " + fila + ":");
 		for (int i = 0; i < getNodos(); i++) {
 				System.out.println(getCost(fila, i));
 		}
+	}
+	
+	public boolean isNodeInWay (ArrayList<Step> way, final int node) {
+		for (int i = 0; i < way.size(); i++) {
+			if (way.get(i).getOrigin() == node) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	/**

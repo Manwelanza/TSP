@@ -63,7 +63,8 @@ public class UpperBound {
 				 contador = 0;
 			 }
 		 }
-		 
+		 calculate2opt(tsp);
+		showWay();
 	}
 	
 	/**
@@ -112,8 +113,90 @@ public class UpperBound {
 	/**
 	 * Método para calcular el algoritmo de refinamiento 2 OPT
 	 */
-	private void calculate2OPT () {
+	private void calculate2opt (Tsp tsp) {
+		Double bestGain = Double.MAX_VALUE;
+		int bestI = Integer.MAX_VALUE;
+		int bestJ = Integer.MIN_VALUE;
+		while (bestGain >= 0.0) {
+			bestGain = 0.0;
+			for (int i = 0; i < getWay().size(); i++) {
+				for (int j = 0; j < getWay().size(); j++) {
+					if (i != j) {
+						Double gain = computeGain (i, j, tsp);
+						if (gain < bestGain) {
+							bestGain = gain;
+							bestI = i;
+							bestJ = j;
+						}
+					}
+				}
+			}
+			if (bestI != Integer.MAX_VALUE && bestJ != Integer.MAX_VALUE) {
+				exchange (bestI, bestJ, tsp);
+			}
+		}
+	}
+	
+	/**
+	 * Método que devuelve la ganancia del cambio de dos nodos
+	 * @param node1 nodo 1
+	 * @param node2 nodo 2
+	 * @param tsp problema TSP
+	 * @return ganancia del cambio
+	 */
+	private Double computeGain (final int node1, final int node2, Tsp tsp) {
+		int origin1 = getWay().get(node1).getOrigin();
+		int origin2 = getWay().get(node2).getOrigin();
+		int destination1 = getWay().get(node1).getDestination();
+		int destination2 = getWay().get(node2).getDestination();
+		return ((tsp.getCost(destination1, destination2) + tsp.getCost(origin1, origin2)) -
+				(tsp.getCost(origin1, destination1) + tsp.getCost(origin2, destination2)));	
+	}
+	
+	/**
+	 * Realiza el cambio entre los nodos
+	 * @param node1 nodo 1
+	 * @param node2 nodo 2
+	 * @param tsp problema TSP
+	 */
+	private void exchange (final int node1, final int node2, Tsp tsp) {
+		int destination1 = node1 + 1;
+		int destination2 = node2 + 1;
 		
+		ArrayList<Step> auxWay = new ArrayList<Step> ();
+		int indexAuxWay = 0;
+		
+		int i = 0;
+		while (i <= node1) {
+			if (tsp.isNodeInWay(auxWay, getWay().get(i).getOrigin()) == false) {
+				auxWay.add(getWay().get(i));
+				indexAuxWay++;
+			}
+			i++;
+		}
+		
+		i = node2;
+		while (i >= destination1) {
+			if (tsp.isNodeInWay(auxWay, getWay().get(i).getOrigin()) == false) {
+				auxWay.add(getWay().get(i));
+				indexAuxWay++;
+			}
+			i--;
+		}
+		
+		i = destination2;
+		while (i < getWay().size()) {
+			if (tsp.isNodeInWay(auxWay, getWay().get(i).getOrigin()) == false) {
+				auxWay.add(getWay().get(i));
+				indexAuxWay++;
+			}
+			i++;
+		}
+		
+		for (int j = 0; j < auxWay.size(); j++) {
+			setBestValue(getBestValue() - getWay().get(j).getCost() + auxWay.get(j).getCost());
+			getWay().set(j, auxWay.get(j));
+		}
 	}
 	
 	/**
@@ -139,6 +222,7 @@ public class UpperBound {
 								getWay().get(i).getDestination() + " = " +
 								getWay().get(i).getCost());
 		}
+		System.out.println("Costo total --> " + getBestValue());
 	}
 	
 	/**
