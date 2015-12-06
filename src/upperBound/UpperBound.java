@@ -64,6 +64,7 @@ public class UpperBound {
 			 }
 		 }
 		 calculate2opt(tsp);
+		 calculateBestValue();
 		showWay();
 	}
 	
@@ -73,6 +74,17 @@ public class UpperBound {
 	 */
 	public void loadTsp (TspInstance tsp) {
 		loadTsp(tsp.getTsp());
+	}
+	
+	/**
+	 * Método que calcula el valor de la cota superior
+	 */
+	private void calculateBestValue () {
+		Double aux = 0.0;
+		for (int i = 0; i < getWay().size(); i++) {
+			aux += getWay().get(i).getCost();
+		}
+		setBestValue(aux);
 	}
 
 	/**
@@ -196,6 +208,7 @@ public class UpperBound {
 		for (int j = 0; j < auxWay.size(); j++) {
 			setBestValue(getBestValue() - getWay().get(j).getCost() + auxWay.get(j).getCost());
 			getWay().set(j, auxWay.get(j));
+			System.out.println("AAAAAAAA");
 		}
 	}
 	
