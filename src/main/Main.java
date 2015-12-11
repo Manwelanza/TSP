@@ -3,6 +3,8 @@
  */
 package main;
 
+import branchAndBound.BranchAndBound;
+import tools.Timer;
 import tspInstances.TspInstance;
 import upperBound.UpperBound;
 
@@ -26,7 +28,17 @@ public class Main {
 			tsp = new TspInstance(args[0]);
 		
 		if (tsp.isLoad()) {
+			Timer timer = new Timer ();
+			timer.start();
 			UpperBound ub = new UpperBound(tsp);
+			BranchAndBound bAb = new BranchAndBound (tsp.getTsp(), ub.getBestValue());
+			int [] resultado = bAb.calculate();
+			String aux = "[";
+			for (int i = 0; i < resultado.length - 1; i ++) {
+				aux += resultado[i] + ", ";
+			}
+			aux += resultado[resultado.length - 1] + "]";
+			System.out.println(aux);
 		}
 	}
 

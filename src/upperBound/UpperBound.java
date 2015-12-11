@@ -65,7 +65,7 @@ public class UpperBound {
 		 }
 		 calculate2opt(tsp);
 		 calculateBestValue();
-		showWay();
+		//showWay();
 	}
 	
 	/**
