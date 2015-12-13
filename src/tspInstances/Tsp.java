@@ -25,10 +25,7 @@ public class Tsp {
 	public Tsp (ArrayList<Double> costs, int nodos) {
 		setCosts(costs);
 		setNodos(nodos);
-		System.out.println(costs.size());
 		int aux = nodos * nodos;
-		System.out.println("nodos: " + nodos);
-		System.out.println("nodos * nodos: " + aux);
 	}
 	
 	/**

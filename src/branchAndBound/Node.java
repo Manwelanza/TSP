@@ -3,14 +3,18 @@
  */
 package branchAndBound;
 
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 import tspInstances.Tsp;
 
-public class Node {
+public class Node implements Comparable<Node>{
 	private Node parent;
 	private double parent_cost;
 	private Tsp tsp;
 	private int[] active_set;
 	private int index;
+	private double lowerBound;
 
 	/**
 	 * Constructor de un nuevo nodo
@@ -27,6 +31,7 @@ public class Node {
 		setTsp (tsp);
 		setActive_set (active_set);
 		setIndex (index);
+		setLowerBound(calculateLowerBound());
 	}
 
 	/**
@@ -44,9 +49,9 @@ public class Node {
 	 * @precondition el nodo no es terminal
 	 * @return array con todos los hijos
 	 */
-	public Node[] generateChildren() {
-		Node[] children = new Node[getActive_set().length - 1];
-
+	public SortedSet<Node> generateChildren() {
+		SortedSet<Node> childrens = new TreeSet<Node> ();
+		
 		int[] new_set = new int[getActive_set().length - 1];
 		int i = 0;
 		for(int location : getActive_set()) {
@@ -57,10 +62,10 @@ public class Node {
 			i++;
 		}
 
-		for(int j = 0; j < children.length; j++)
-			children[j] = new Node(this, getTsp().getCost(index, new_set[j]), getTsp(), new_set, new_set[j]);
-
-		return children;
+		for (int j = 0; j < getActive_set().length - 1; j++)
+			childrens.add(new Node(this, getTsp().getCost(getIndex(), new_set[j]), getTsp(), new_set, new_set[j]));
+		
+		return childrens;
 	}
 
 	
@@ -93,7 +98,7 @@ public class Node {
 	 *
 	 * @return Cota inferior
 	 */
-	public double getLowerBound() {
+	public double calculateLowerBound() {
 		double value = 0;
 
 		if(getActive_set().length == 2)
@@ -119,8 +124,10 @@ public class Node {
 
 			value += low1 + low2;
 		}
-
-		return getParentCost() + value / 2;
+		
+		double resultado = getParentCost() + value / 2;
+		setLowerBound(resultado);
+		return resultado;
 	}
 
 	/**
@@ -212,5 +219,62 @@ public class Node {
 	 */
 	private void setTsp(Tsp tsp) {
 		this.tsp = tsp;
+	}
+
+	/**
+	 * @return the lowerBound
+	 */
+	public double getLowerBound() {
+		return lowerBound;
+	}
+	
+	/**
+	 * @param lowerBound the lowerBound to set
+	 */
+	private void setLowerBound(double lowerBound) {
+		this.lowerBound = lowerBound;
+	}
+
+	/**
+	 * Método sobrescrito para implementar comparable
+	 */
+	
+	@Override
+	public int compareTo(Node arg0) {
+		if (getLowerBound() < arg0.getLowerBound())
+			return -1;
+		
+		if (getLowerBound() > arg0.getLowerBound())
+			return 1;
+		
+		return 0;
+	}
+	
+	/**
+	 * Método sobrescrito para implementar comparable
+	 */
+	@Override
+    public int hashCode() {
+		Double auxLB = (Double) getLowerBound();
+		Double auxPC = (Double) getParent_cost();
+		return (auxLB.hashCode() + getParent().hashCode() + auxPC.hashCode() + getIndex() + 
+				getActive_set().hashCode() + getTsp().hashCode());
+	}
+	
+	/**
+	 * Método sobrescrito para implementar comparable
+	 */
+	@Override
+    public boolean equals(Object obj) {
+		if (obj == null) {   return false;  }
+        if (getClass() != obj.getClass()) {  return false;   }
+        final Node other = (Node) obj;
+        if (getParent() != other.getParent()) {  return false;    }
+        if (getLowerBound() != other.getLowerBound()) {  return false;    }
+        if (getParent_cost() != other.getParent_cost()) {  return false;    }
+        if (getIndex() != other.getIndex()) {  return false;    }
+        if (getTsp().hashCode() != other.getTsp().hashCode()) {  return false;    }
+        if (getActive_set().hashCode() != other.getActive_set().hashCode()) {  return false;    }
+        return true;
 	}
 }

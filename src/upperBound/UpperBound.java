@@ -65,7 +65,6 @@ public class UpperBound {
 		 }
 		 calculate2opt(tsp);
 		 calculateBestValue();
-		//showWay();
 	}
 	
 	/**
@@ -208,7 +207,6 @@ public class UpperBound {
 		for (int j = 0; j < auxWay.size(); j++) {
 			setBestValue(getBestValue() - getWay().get(j).getCost() + auxWay.get(j).getCost());
 			getWay().set(j, auxWay.get(j));
-			System.out.println("AAAAAAAA");
 		}
 	}
 	
@@ -236,6 +234,15 @@ public class UpperBound {
 								getWay().get(i).getCost());
 		}
 		System.out.println("Costo total --> " + getBestValue());
+	}
+	
+	public int [] getPath () {
+		int [] path = new int [getWay().size() - 1];
+		for (int i = 0; i < path.length; i++) {
+			path[i] = getWay().get(i).getOrigin();
+		}
+		
+		return path;
 	}
 	
 	/**
