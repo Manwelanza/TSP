@@ -12,35 +12,26 @@ public class Node implements Comparable<Node>{
 	private Node parent;
 	private double parent_cost;
 	private Tsp tsp;
-	private int[] active_set;
+	private int[] activeSet;
 	private int index;
 	private double lowerBound;
 
 	/**
-	 * Constructor de un nuevo nodo
+	 * Constructor de un nodo
 	 *
 	 * @param parent Padre de este nodo
 	 * @param parent_cost Coste entre el padre y este nodo
 	 * @param tsp Problema tsp
-	 * @param active_set Todos los nodos que estan siendo calculados (incluido este)
+	 * @param activeSet Todos los nodos que estan siendo calculados (incluido este)
 	 * @param index Índice de este nodo
 	 */
-	public Node(Node parent, double parent_cost, Tsp tsp, int[] active_set, int index) {
+	public Node(Node parent, double parent_cost, Tsp tsp, int[] activeSet, int index) {
 		setParent (parent);
 		setParent_cost (parent_cost);
 		setTsp (tsp);
-		setActive_set (active_set);
+		setActiveSet (activeSet);
 		setIndex (index);
 		setLowerBound(calculateLowerBound());
-	}
-
-	/**
-	 * Comprueba si este nodo es terminal
-	 *
-	 * @return devuelve si es terminal o no
-	 */
-	public boolean isTerminal() {
-		return getActive_set().length == 1;
 	}
 
 	/**
@@ -52,9 +43,9 @@ public class Node implements Comparable<Node>{
 	public SortedSet<Node> generateChildren() {
 		SortedSet<Node> childrens = new TreeSet<Node> ();
 		
-		int[] new_set = new int[getActive_set().length - 1];
+		int[] new_set = new int[getActiveSet().length - 1];
 		int i = 0;
-		for(int location : getActive_set()) {
+		for(int location : getActiveSet()) {
 			if(location == getIndex())
 				continue;
 
@@ -62,7 +53,9 @@ public class Node implements Comparable<Node>{
 			i++;
 		}
 
-		for (int j = 0; j < getActive_set().length - 1; j++)
+		/* Añadimos los nodos y estos se ordenan automáticamente de menor a mayor 
+		 según su cota inferior, debido a la clase SortedSet*/
+		for (int j = 0; j < getActiveSet().length - 1; j++)
 			childrens.add(new Node(this, getTsp().getCost(getIndex(), new_set[j]), getTsp(), new_set, new_set[j]));
 		
 		return childrens;
@@ -75,7 +68,7 @@ public class Node implements Comparable<Node>{
 	 * @return Camino
 	 */
 	public int[] getPath() {
-		int depth = getTsp().getNodos() - getActive_set().length + 1;
+		int depth = getTsp().getNodos() - getActiveSet().length + 1;
 		int[] path = new int[depth];
 		getPathIndex(path, depth - 1);
 		return path;
@@ -101,14 +94,14 @@ public class Node implements Comparable<Node>{
 	public double calculateLowerBound() {
 		double value = 0;
 
-		if(getActive_set().length == 2)
-			return getPathCost() + getTsp().getCost(getActive_set()[0], getActive_set()[1]);
+		if(getActiveSet().length == 2)
+			return getPathCost() + getTsp().getCost(getActiveSet()[0], getActiveSet()[1]);
 
-		for(int location : getActive_set()) {
+		for(int location : getActiveSet()) {
 			double low1 = Double.MAX_VALUE;
 			double low2 = Double.MAX_VALUE;
 
-			for(int other: getActive_set()) {
+			for(int other: getActiveSet()) {
 				if(other == location)
 					continue;
 
@@ -136,7 +129,7 @@ public class Node implements Comparable<Node>{
 	 * @return Coste del camino hasta aquí
 	 */
 	public double getPathCost() {
-		return getTsp().getCost(0, index) + getParentCost();
+		return getTsp().getCost(0, getIndex()) + getParentCost();
 	}
 
 	/**
@@ -148,7 +141,16 @@ public class Node implements Comparable<Node>{
 		if(parent == null)
 			return 0;
 
-		return parent_cost + parent.getParentCost();
+		return getParent_cost() + getParent().getParentCost();
+	}
+	
+	/**
+	 * Comprueba si este nodo es terminal
+	 *
+	 * @return devuelve si es terminal o no
+	 */
+	public boolean isTerminal() {
+		return getActiveSet().length == 1;
 	}
 
 	/**
@@ -180,17 +182,17 @@ public class Node implements Comparable<Node>{
 	}
 
 	/**
-	 * @return the active_set
+	 * @return the activeSet
 	 */
-	private int[] getActive_set() {
-		return active_set;
+	private int[] getActiveSet() {
+		return activeSet;
 	}
 
 	/**
-	 * @param active_set the active_set to set
+	 * @param activeSet the activeSet to set
 	 */
-	private void setActive_set(int[] active_set) {
-		this.active_set = active_set;
+	private void setActiveSet(int[] activeSet) {
+		this.activeSet = activeSet;
 	}
 
 	/**
@@ -238,7 +240,6 @@ public class Node implements Comparable<Node>{
 	/**
 	 * Método sobrescrito para implementar comparable
 	 */
-	
 	@Override
 	public int compareTo(Node arg0) {
 		if (getLowerBound() < arg0.getLowerBound())
@@ -258,7 +259,7 @@ public class Node implements Comparable<Node>{
 		Double auxLB = (Double) getLowerBound();
 		Double auxPC = (Double) getParent_cost();
 		return (auxLB.hashCode() + getParent().hashCode() + auxPC.hashCode() + getIndex() + 
-				getActive_set().hashCode() + getTsp().hashCode());
+				getActiveSet().hashCode() + getTsp().hashCode());
 	}
 	
 	/**
@@ -274,7 +275,7 @@ public class Node implements Comparable<Node>{
         if (getParent_cost() != other.getParent_cost()) {  return false;    }
         if (getIndex() != other.getIndex()) {  return false;    }
         if (getTsp().hashCode() != other.getTsp().hashCode()) {  return false;    }
-        if (getActive_set().hashCode() != other.getActive_set().hashCode()) {  return false;    }
+        if (getActiveSet().hashCode() != other.getActiveSet().hashCode()) {  return false;    }
         return true;
 	}
 }

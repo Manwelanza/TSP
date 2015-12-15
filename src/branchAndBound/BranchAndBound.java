@@ -11,10 +11,16 @@ import tspInstances.Tsp;
 import upperBound.UpperBound;
 
 public class BranchAndBound {
-	private long limitedTime; 			// limite de tiempo que se ejecuta el algoritmo (nanosegundos)
+	public static final long TINY_PROBLEM = 600; 	// 10 minutos
+	public static final long MEDIUM_PROBLEM = 3600; // 1 hora
+	public static final long BIG_PROBLEM = 86400;	// 1 día
+	
+	private static final int MAX_SIZE_NODES_RECURSIVE = 20;
+	
+	private long limitedTime; 						// limite de tiempo que se ejecuta el algoritmo (nanosegundos)
 	private Tsp tsp;
-	private double best_cost;
-	private int[] best_path;
+	private double bestValue;
+	private int[] bestWay;
 
 	/**
 	 * Constructor para el algoritmo de ramificación y poda
@@ -24,9 +30,9 @@ public class BranchAndBound {
 	public BranchAndBound(Tsp tsp) {
 		setTsp(tsp);
 		UpperBound ub = new UpperBound(tsp);
-		setBest_cost(ub.getBestValue());
-		setBest_path(ub.getPath());
-		setLimitedTime(30);
+		setBestValue(ub.getBestValue());
+		setBestWay(ub.getPath());
+		setLimitedTime(TINY_PROBLEM);
 	}
 	
 	/**
@@ -38,11 +44,22 @@ public class BranchAndBound {
 	public BranchAndBound(Tsp tsp, long limitedTime) {
 		setTsp(tsp);
 		UpperBound ub = new UpperBound(tsp);
-		setBest_cost(ub.getBestValue());
-		setBest_path(ub.getPath());
+		setBestValue(ub.getBestValue());
+		setBestWay(ub.getPath());
 		setLimitedTime(limitedTime);
 	}
 
+	@Override
+	public String toString () {
+		String aux = "[";
+		for (int i = 0; i < getBestWay().length - 1; i ++) {
+			aux += getBestWay()[i] + ", ";
+		}
+		aux += getBestWay()[getBestWay().length - 1] + "]\n";
+		aux += "Value: " + getBestValue();
+		return aux;
+	}
+	
 	/**
 	 * Método que calcula el camino mínimo del TSP empezando por el nodo que se le haya pasado
 	 *
@@ -50,14 +67,14 @@ public class BranchAndBound {
 	 * @return Solución del TSP
 	 */
 	public int[] calculate(int initial) {
-		int[] active_set = new int[getTsp().getNodos()];
-		for(int i = 0; i < active_set.length; i++)
-			active_set[i] = i;
+		int[] activeSet = new int[getTsp().getNodos()];
+		for(int i = 0; i < activeSet.length; i++)
+			activeSet[i] = i;
 		
-		Node root = new Node(null, 0, getTsp(), active_set, initial);
-		traverse2(root);
+		Node root = new Node(null, 0, getTsp(), activeSet, initial);
+		solve (root);
 
-		return getBest_path();
+		return getBestWay();
 	}
 	
 	/**
@@ -70,45 +87,52 @@ public class BranchAndBound {
 		for(int i = 0; i < active_set.length; i++)
 			active_set[i] = i;
 
+		// Generamos un nodo aleatorio desde el que empezar
 		int initialNode = (int) Math.floor(Math.random() * getTsp().getNodos());
 		
 		Node root = new Node(null, 0, getTsp(), active_set, initialNode);
-		traverse(root);
+		solve (root);
 
-		return getBest_path();
+		return getBestWay();
 	}
 
 	/**
-	 * Método que devuelve el valor del problema TSP
-	 *
-	 * @return Valor del camino del TSP
+	 * Método que decide como resolver el algoritmo, si es un caso pequeño utiliza un método
+	 * recursivo, pero si es grande utiliza uno iterativo
+	 * 
+	 * @param parent nodo inicial del algoritmo
 	 */
-	public double getCost() {
-		return getBest_cost();
+	private void solve (Node parent) {
+		if (getTsp().getNodos() <= MAX_SIZE_NODES_RECURSIVE)
+			traverse (parent);
+		else
+			traverse2 (parent);
 	}
-
+	
 	/**
 	 * Método Recursivo que calcula el TSP usando el algoritmo de ramificación y poda
 	 *
 	 * @param nodo inicial
 	 */
-	private void traverse(Node parent) {
-		// Generamos los hijos del nodo parent, ordenados de menor a mayor segun su cota inferior
+	private void traverse (Node parent) {
+		// Generamos los hijos del nodo parent, ordenados de menor a mayor según su cota inferior
 		SortedSet<Node> children = parent.generateChildren();
 		
+		/* En este caso no hace falta limitaciones de tiempo, debido a que este método 
+		 * solo se llama en caso pequeños
+		 */
 		for(Node child : children) {
 			if(child.isTerminal()) {
 				double cost = child.getPathCost();
-				if(cost < getBest_cost()) {
-					setBest_cost(cost);
-					setBest_path(child.getPath());
+				if(cost < getBestValue()) {
+					setBestValue(cost);
+					setBestWay(child.getPath());
 				}
 			}
-			else if(child.getLowerBound() <= getBest_cost()) {
-				traverse(child);
+			else if(child.getLowerBound() <= getBestValue()) {
+				solve(child);
 			}
 		}
-
 	}
 	
 	/**
@@ -122,7 +146,8 @@ public class BranchAndBound {
 		Timer timer = new Timer ();
 		timer.start();
 		timer.stop();
-		while (timer.getTime() <= getLimitedTimeNano() && !stack.isEmpty()) {
+
+		while ((timer.getTime() <= getLimitedTimeNano()) && (!stack.isEmpty())) {
 			Node node = stack.pop();
 			SortedSet<Node> children = node.generateChildren();
 			// Ahora recorremos los hijos al revés, para que queden arriba de la pila los nodos con cota inferior más baja 
@@ -131,12 +156,12 @@ public class BranchAndBound {
 				Node child = children.last();
 				if(child.isTerminal()) {
 					double cost = child.getPathCost();
-					if(cost < getBest_cost()) {
-						setBest_cost(cost);
-						setBest_path(child.getPath());
+					if(cost < getBestValue()) {
+						setBestValue(cost);
+						setBestWay(child.getPath());
 					}
 				}
-				else if(child.getLowerBound() <= getBest_cost()) {
+				else if(child.getLowerBound() <= getBestValue()) {
 					stack.push(child);
 				}
 				children.remove(child);
@@ -165,31 +190,31 @@ public class BranchAndBound {
 	}
 
 	/**
-	 * @return the best_cost
+	 * @return the bestValue
 	 */
-	private double getBest_cost() {
-		return best_cost;
+	public double getBestValue() {
+		return bestValue;
 	}
 
 	/**
-	 * @param best_cost the best_cost to set
+	 * @param bestValue the bestValue to set
 	 */
-	private void setBest_cost(double best_cost) {
-		this.best_cost = best_cost;
+	private void setBestValue(double bestValue) {
+		this.bestValue = bestValue;
 	}
 
 	/**
-	 * @return the best_path
+	 * @return the bestWay
 	 */
-	private int[] getBest_path() {
-		return best_path;
+	private int[] getBestWay() {
+		return bestWay;
 	}
 
 	/**
-	 * @param best_path the best_path to set
+	 * @param bestWay the bestWay to set
 	 */
-	private void setBest_path(int[] best_path) {
-		this.best_path = best_path;
+	private void setBestWay(int[] bestWay) {
+		this.bestWay = bestWay;
 	}
 
 	/**

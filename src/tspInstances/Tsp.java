@@ -25,7 +25,6 @@ public class Tsp {
 	public Tsp (ArrayList<Double> costs, int nodos) {
 		setCosts(costs);
 		setNodos(nodos);
-		int aux = nodos * nodos;
 	}
 	
 	/**

@@ -30,30 +30,12 @@ public class Main {
 		if (tsp.isLoad()) {
 			Timer timer = new Timer ();
 			timer.start();
-			BranchAndBound bAb = new BranchAndBound (tsp.getTsp(), 600);
+			BranchAndBound bAb = new BranchAndBound (tsp.getTsp(), BranchAndBound.TINY_PROBLEM);
 			int initialNode = 0;
 			int [] resultado = bAb.calculate(initialNode);
 			timer.stop();
-			String aux = "[";
-			for (int i = 0; i < resultado.length - 1; i ++) {
-				aux += resultado[i] + ", ";
-			}
-			aux += resultado[resultado.length - 1] + "]";
-			System.out.println(aux);
-			System.out.println("Value: " + bAb.getCost());
+			System.out.println(bAb);
 			System.out.println("Time: " + timer.getFormattedTime());
-			
-			
-			// QUITAR!!!
-			for (int i = 0; i < resultado.length; i++) { // for de comprobacion
-				for (int j = 0; j < resultado.length; j++) {
-					if (i != j) {
-						if (resultado[i] == resultado[j]) {
-							System.out.println("ESTA MAL upperBound");
-						}
-					}
-				}
-			}// for de comprobacion
 		}
 	}
 
